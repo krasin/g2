@@ -7,6 +7,4 @@ before_install:
 install:
   - sudo apt-get install -qq lib32z1
 
-script: "cd TinyG2 && make"
-
-
+script: "cd TinyG2 && make && mkdir cbuild && cd cbuild && cmake .. && make -j8"
