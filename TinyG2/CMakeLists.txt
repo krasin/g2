@@ -14,8 +14,10 @@ message("TOOLS_VERSION_SHORT: [${TOOLS_VERSION_SHORT}]")
 message("TOOLS_URL_PREFIX: [${TOOLS_URL_PREFIX}]")
 
 ExternalProject_Add(arm-eabi-toolchain
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/external
   PREFIX arm-none-eabi
   URL ${TOOLS_URL_PREFIX}/gcc-arm-none-eabi-${TOOLS_VERSION_FILENAME}-linux.tar.bz2
+  URL_MD5 72b0d06ae16b303c25fd70b2883d3950
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
@@ -23,14 +25,14 @@ ExternalProject_Add(arm-eabi-toolchain
 
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
-SET(CMAKE_C_COMPILER ${PROJECT_BINARY_DIR}/arm-none-eabi/src/arm-eabi-toolchain/bin/arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER ${PROJECT_BINARY_DIR}/arm-none-eabi/src/arm-eabi-toolchain/bin/arm-none-eabi-g++)
+SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-gcc)
+SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-g++)
 
 SET(CMAKE_FIND_ROOT_PATH
-  ${PROJECT_BINARY_DIR}/arm-none-eabi/src/arm-eabi-toolchain/arm-none-eabi/bin
-  ${PROJECT_BINARY_DIR}/arm-none-eabi/src/arm-eabi-toolchain/arm-none-eabi/lib
-  ${PROJECT_BINARY_DIR}/arm-none-eabi/src/arm-eabi-toolchain/arm-none-eabi/include
-  )
+  ${PROJECT_SOURCE_DIR}/external/bin
+  ${PROJECT_SOURCE_DIR}/external/arm-none-eabi/lib
+  ${PROJECT_SOURCE_DIR}/external/arm-none-eabi/include
+ )
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
