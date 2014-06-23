@@ -36,6 +36,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 add_definitions("--param max-inline-insns-single=500 -mcpu=cortex-m3 -mthumb -mlong-calls")
 add_definitions("-ffunction-sections -fdata-sections -nostdlib -Wall -g3 -Os")
 add_definitions("-u _printf_float")
@@ -142,6 +143,7 @@ add_executable("${PLATFORM}.elf"
 
 add_dependencies("${PLATFORM}.elf" arm-eabi-toolchain)
 
+# Generate .bin file
 add_custom_command(OUTPUT "${PLATFORM}.bin.tmp"
     COMMAND "${OBJCOPY}" --output-format=binary "${PLATFORM}.elf" "${PLATFORM}.bin.tmp"
     COMMAND ${CMAKE_COMMAND} -E copy "${PLATFORM}.bin.tmp" "${PLATFORM}.bin"
@@ -150,3 +152,13 @@ add_custom_command(OUTPUT "${PLATFORM}.bin.tmp"
 
 add_custom_target("${PLATFORM}.bin" ALL DEPENDS "${PLATFORM}.bin.tmp")
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PLATFORM}.bin")
+
+# Generate HEX file
+add_custom_command(OUTPUT "${PLATFORM}.hex.tmp"
+    COMMAND "${OBJCOPY}" --output-format=ihex "${PLATFORM}.elf" "${PLATFORM}.hex.tmp"
+    COMMAND ${CMAKE_COMMAND} -E copy "${PLATFORM}.hex.tmp" "${PLATFORM}.hex"
+    DEPENDS "${PLATFORM}.elf"
+    COMMENT "Generating ${PLATFORM}.hex")
+
+add_custom_target("${PLATFORM}.hex" ALL DEPENDS "${PLATFORM}.hex.tmp")
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PLATFORM}.hex")
