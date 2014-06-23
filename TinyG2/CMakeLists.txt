@@ -82,6 +82,13 @@ IF(BASE_PLATFORM STREQUAL "v9_3x8c")
 ENDIF()
 
 add_definitions("-D__${CHIP}__")
+SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--check-sections -Wl,--gc-sections")
+
+# Hack for suppressing warnings about 3 missing symbols.
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=SMC_Handler=0")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=USART3_Handler=0")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=EMAC_Handler=0")
 
 # Workaround for http://www.cmake.org/Bug/view.php?id=9985
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
