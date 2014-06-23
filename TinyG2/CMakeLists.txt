@@ -83,7 +83,9 @@ ENDIF()
 
 add_definitions("-D__${CHIP}__")
 
-SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+# Workaround for http://www.cmake.org/Bug/view.php?id=9985
+SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 include_directories(. motate "${CMSIS_ROOT}/CMSIS/Include")
 
@@ -100,7 +102,6 @@ add_executable("${PLATFORM}.elf"
   encoder.cpp
   gcode_parser.cpp
   hardware.cpp
-  hello.c
   help.cpp
   json_parser.cpp
   kinematics.cpp
