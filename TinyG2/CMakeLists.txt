@@ -10,9 +10,6 @@ SET(TOOLS_EXPANDED_DIRNAME "gcc-arm-none-eabi-4_8-2014q1")
 
 SET(TOOLS_URL_PREFIX "https://launchpad.net/gcc-arm-embedded/${TOOLS_VERSION_SHORT}/${TOOLS_VERSION_LONG}/+download/")
 
-message("TOOLS_VERSION_SHORT: [${TOOLS_VERSION_SHORT}]")
-message("TOOLS_URL_PREFIX: [${TOOLS_URL_PREFIX}]")
-
 ExternalProject_Add(arm-eabi-toolchain
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/external
   PREFIX arm-none-eabi
@@ -27,6 +24,7 @@ SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-gcc)
 SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-g++)
+SET(OBJCOPY ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-objcopy)
 
 SET(CMAKE_FIND_ROOT_PATH
   ${PROJECT_SOURCE_DIR}/external/bin
@@ -38,8 +36,9 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
-add_definitions("--param max-inline-insns-single=500 -mcpu=cortex-m3 -mthumb -mlong-calls
-    -ffunction-sections -fdata-sections -nostdlib -Wall")
+add_definitions("--param max-inline-insns-single=500 -mcpu=cortex-m3 -mthumb -mlong-calls")
+add_definitions("-ffunction-sections -fdata-sections -nostdlib -Wall -g3 -Os")
+add_definitions("-u _printf_float")
 
 # Turn off printf() format strings. We use late bound FLASH and RAM format strings and this causes warnings
 add_definitions("-Wno-format-nonliteral -Wno-format-security")
@@ -64,6 +63,7 @@ ENDIF()
 
 add_definitions("-DMOTATE_BOARD=${MOTATE_BOARD}")
 add_definitions("-DPLATFORM=${PLATFORM}")
+add_definitions("-Dflash")
 
 IF(BASE_PLATFORM STREQUAL "due")
   SET(CHIP "SAM3X8E")
@@ -84,13 +84,15 @@ IF(BASE_PLATFORM STREQUAL "v9_3x8c")
 ENDIF()
 
 add_definitions("-D__${CHIP}__")
-SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld")
+SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld -Wl,--entry=Reset_Handler")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--check-sections -Wl,--gc-sections")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--cref -Wl,-Map,${PLATFORM}.map")
 
 # Hack for suppressing warnings about 3 missing symbols.
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=SMC_Handler=0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=USART3_Handler=0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=EMAC_Handler=0")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles --specs=nano.specs  -u _printf_float")
 
 # Workaround for http://www.cmake.org/Bug/view.php?id=9985
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
@@ -140,3 +142,11 @@ add_executable("${PLATFORM}.elf"
 
 add_dependencies("${PLATFORM}.elf" arm-eabi-toolchain)
 
+add_custom_command(OUTPUT "${PLATFORM}.bin.tmp"
+    COMMAND "${OBJCOPY}" --output-format=binary "${PLATFORM}.elf" "${PLATFORM}.bin.tmp"
+    COMMAND ${CMAKE_COMMAND} -E copy "${PLATFORM}.bin.tmp" "${PLATFORM}.bin"
+    DEPENDS "${PLATFORM}.elf"
+    COMMENT "Generating ${PLATFORM}.bin")
+
+add_custom_target("${PLATFORM}.bin" ALL DEPENDS "${PLATFORM}.bin.tmp")
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PLATFORM}.bin")
