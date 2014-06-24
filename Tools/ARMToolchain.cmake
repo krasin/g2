@@ -1,0 +1,37 @@
+include(ExternalProject)
+
+SET(TOOLS_VERSION_SHORT "4.8")
+SET(TOOLS_VERSION_LONG "4.8-2014-q1-update")
+SET(TOOLS_VERSION_FILENAME "4_8-2014q1-20140314")
+SET(TOOLS_EXPANDED_DIRNAME "gcc-arm-none-eabi-4_8-2014q1")
+
+SET(TOOLS_URL_PREFIX "https://launchpad.net/gcc-arm-embedded/${TOOLS_VERSION_SHORT}/${TOOLS_VERSION_LONG}/+download/")
+
+ExternalProject_Add(arm-eabi-toolchain
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/external
+  PREFIX arm-none-eabi
+  URL ${TOOLS_URL_PREFIX}/gcc-arm-none-eabi-${TOOLS_VERSION_FILENAME}-linux.tar.bz2
+  URL_MD5 72b0d06ae16b303c25fd70b2883d3950
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  )
+
+SET(CMAKE_SYSTEM_NAME Generic)
+SET(CMAKE_SYSTEM_VERSION 1)
+SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-gcc)
+SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-g++)
+SET(OBJCOPY ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-objcopy)
+
+SET(CMAKE_FIND_ROOT_PATH
+  ${PROJECT_SOURCE_DIR}/external/bin
+  ${PROJECT_SOURCE_DIR}/external/arm-none-eabi/lib
+  ${PROJECT_SOURCE_DIR}/external/arm-none-eabi/include
+ )
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# Workaround for http://www.cmake.org/Bug/view.php?id=9985
+SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
