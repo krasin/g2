@@ -23,7 +23,7 @@ SET(TOOLS_URL "${TOOLS_URL_PREFIX}/${TOOLS_ARCHIVE_NAME}")
 IF(NOT IS_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/arm-eabi-toolchain")
 message("Downloading ARM EABI toolchain from ${TOOLS_URL} ...")
 file(DOWNLOAD ${TOOLS_URL} "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_ARCHIVE_NAME}" SHOW_PROGRESS)
-execute_process(COMMAND tar xhjf "${TOOLS_ARCHIVE_NAME}"
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar xhjf "${TOOLS_ARCHIVE_NAME}"
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/")
 file(RENAME "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_EXPANDED_DIRNAME}" "${CMAKE_SOURCE_DIR}/../Tools/arm-eabi-toolchain")
 file(REMOVE "${CMAKE_SOURCE_DIR}/../Tools/{TOOLS_ARCHIVE_NAME}")
