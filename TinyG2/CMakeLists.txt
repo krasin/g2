@@ -60,7 +60,8 @@ IF(BASE_PLATFORM STREQUAL "v9_3x8c")
 ENDIF()
 
 add_definitions("-D__${CHIP}__")
-SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld -Wl,--entry=Reset_Handler")
+# SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld -Wl,--entry=Reset_Handler")
+SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/m3-semihosting.ld -Wl,--entry=Reset_Handler")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--check-sections -Wl,--gc-sections")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--cref -Wl,-Map,${PLATFORM}.map")
 

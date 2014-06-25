@@ -148,6 +148,8 @@ int main(void)
 	// system initialization
 	_system_init();
 
+	printf("Hello world!\n");
+
 	// TinyG application setup
 	_application_init();
 	_unit_tests();					// run any unit tests that are enabled
