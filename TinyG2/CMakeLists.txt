@@ -16,9 +16,12 @@ add_definitions("-Wno-format-nonliteral -Wno-format-security")
 add_definitions("-Wno-unknown-pragmas")
 
 IF(NOT PLATFORM)
-  MESSAGE("Setting default platform.")
   SET(PLATFORM "gShield")
+  MESSAGE("Setting default platform: ${PLATFORM}")
+  MESSAGE("To configure with a specific platform, use: 'cmake -DPLATFORM=value ..'")
 ENDIF()
+
+MESSAGE("PLATFORM: ${PLATFORM}")
 
 IF(PLATFORM STREQUAL "gShield")
   SET(BASE_PLATFORM "due")
@@ -49,7 +52,11 @@ IF(BASE_PLATFORM STREQUAL "v9_3x8c")
   SET(CHIP "SAM3X8C")
   SET(PLATFORM_BASE platform/atmel_sam)
   SET(CMSIS_ROOT CMSIS)
-  include_directories(CMSIS/Device/ATMEL platform/atmel_sam/board/v9_3x8c)
+  include_directories(
+      CMSIS/Device/ATMEL
+      platform/atmel_sam
+      CMSIS/Device/ATMEL/sam3xa/include
+      platform/atmel_sam/board/v9_3x8c)
 ENDIF()
 
 add_definitions("-D__${CHIP}__")
