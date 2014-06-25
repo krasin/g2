@@ -9,39 +9,35 @@ SET(TOOLS_URL_PREFIX "https://launchpad.net/gcc-arm-embedded/${TOOLS_VERSION_SHO
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   SET(TOOLS_SUFFIX "linux.tar.bz2")
-  SET(TOOLS_MD5 "72b0d06ae16b303c25fd70b2883d3950")
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   SET(TOOLS_SUFFIX "mac.tar.bz2")
-  SET(TOOLS_MD5 "5d34d95a53ba545f1585b9136cbb6805")
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   SET(TOOLS_SUFFIX "win32.zip")
-  SET(TOOLS_MD5 "09c19b3248863074f5498a88f31bee16")
 ELSE()
   MESSAGE(FATAL_ERROR "Unsupported system: ${CMAKE_SYSTEM_NAME}")
 ENDIF()
 
-SET(TOOLS_URL "${TOOLS_URL_PREFIX}/gcc-arm-none-eabi-${TOOLS_VERSION_FILENAME}-${TOOLS_SUFFIX}")
+SET(TOOLS_ARCHIVE_NAME "gcc-arm-none-eabi-${TOOLS_VERSION_FILENAME}-${TOOLS_SUFFIX}")
+SET(TOOLS_URL "${TOOLS_URL_PREFIX}/${TOOLS_ARCHIVE_NAME}")
 
-ExternalProject_Add(arm-eabi-toolchain
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/external
-  PREFIX arm-none-eabi
-  URL "${TOOLS_URL}"
-  URL_MD5 "${TOOLS_MD5}"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-  )
+IF(NOT IS_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/arm-eabi-toolchain")
+file(DOWNLOAD ${TOOLS_URL} "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_ARCHIVE_NAME}" SHOW_PROGRESS)
+execute_process(COMMAND tar xhjf "${TOOLS_ARCHIVE_NAME}"
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/")
+file(RENAME "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_EXPANDED_DIRNAME}" "${CMAKE_SOURCE_DIR}/../Tools/arm-eabi-toolchain")
+file(REMOVE "${CMAKE_SOURCE_DIR}/../Tools/{TOOLS_ARCHIVE_NAME}")
+ENDIF()
 
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
-SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-g++)
-SET(OBJCOPY ${PROJECT_SOURCE_DIR}/external/bin/arm-none-eabi-objcopy)
+SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/../Tools/arm-eabi-toolchain/bin/arm-none-eabi-gcc)
+SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/../Tools/arm-eabi-toolchain/bin/arm-none-eabi-g++)
+SET(OBJCOPY ${PROJECT_SOURCE_DIR}/../Tools/arm-eabi-toolchain/bin/arm-none-eabi-objcopy)
 
 SET(CMAKE_FIND_ROOT_PATH
-  ${PROJECT_SOURCE_DIR}/external/bin
-  ${PROJECT_SOURCE_DIR}/external/arm-none-eabi/lib
-  ${PROJECT_SOURCE_DIR}/external/arm-none-eabi/include
+  ${PROJECT_SOURCE_DIR}/../Tools/arm-eabi-toolchain/arm-none-eabi/bin
+  ${PROJECT_SOURCE_DIR}/../Tools/arm-eabi-toolchain/arm-none-eabi/lib
+  ${PROJECT_SOURCE_DIR}/../Tools/arm-eabi-toolchain/arm-none-eabi/include
  )
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

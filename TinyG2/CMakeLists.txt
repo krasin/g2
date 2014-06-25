@@ -112,8 +112,6 @@ add_executable("${PLATFORM}.elf"
   util.cpp
   xio.cpp)
 
-add_dependencies("${PLATFORM}.elf" arm-eabi-toolchain)
-
 # Generate .bin file
 add_custom_command(OUTPUT "${PLATFORM}.bin.tmp"
     COMMAND "${OBJCOPY}" --output-format=binary "${PLATFORM}.elf" "${PLATFORM}.bin.tmp"
