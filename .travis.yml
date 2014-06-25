@@ -8,6 +8,6 @@ install:
   - sudo apt-get install -qq lib32z1
 
 script:
-  - "( cd TinyG2 && make )"
   - "( cd TinyG2 && mkdir build.gShield && cd build.gShield && cmake .. && make -j8 )"
   - "( cd TinyG2 && mkdir build.G2v9g && cd build.G2v9g && cmake -DPLATFORM=G2v9g .. && make -j8 )"
+  - "( cd TinyG2 && make )"
