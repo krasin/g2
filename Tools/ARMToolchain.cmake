@@ -1,40 +1,46 @@
 include(ExternalProject)
 
-SET(TOOLS_VERSION_SHORT "4.8")
-SET(TOOLS_VERSION_LONG "4.8-2014-q1-update")
-SET(TOOLS_VERSION_FILENAME "4_8-2014q1-20140314")
-SET(TOOLS_EXPANDED_DIRNAME "gcc-arm-none-eabi-4_8-2014q1")
+IF (PLATFORM STREQUAL "qemu")
+  SET(TOOLS_ARCHIVE_NAME "arm-2014.05-28-arm-none-eabi-i686-pc-linux-gnu.tar.bz2")
+  SET(TOOLS_URL "https://sourcery.mentor.com/GNUToolchain/package12774/public/arm-none-eabi/${TOOLS_ARCHIVE_NAME}")
+  SET(TOOLS_DIR "arm-2014.05")
+ELSE()
+  SET(TOOLS_VERSION_SHORT "4.8")
+  SET(TOOLS_VERSION_LONG "4.8-2014-q1-update")
+  SET(TOOLS_VERSION_FILENAME "4_8-2014q1-20140314")
+  SET(TOOLS_DIR "gcc-arm-none-eabi-4_8-2014q1")
+  SET(TOOLS_URL_PREFIX "https://launchpad.net/gcc-arm-embedded/${TOOLS_VERSION_SHORT}/${TOOLS_VERSION_LONG}/+download/")
 
-SET(TOOLS_URL_PREFIX "https://launchpad.net/gcc-arm-embedded/${TOOLS_VERSION_SHORT}/${TOOLS_VERSION_LONG}/+download/")
+  IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    SET(TOOLS_SUFFIX "linux.tar.bz2")
+  ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    SET(TOOLS_SUFFIX "mac.tar.bz2")
+  ENDIF()
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  SET(TOOLS_SUFFIX "linux.tar.bz2")
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  SET(TOOLS_SUFFIX "mac.tar.bz2")
+  IF (TOOLS_SUFFIX)
+    SET(TOOLS_ARCHIVE_NAME "gcc-arm-none-eabi-${TOOLS_VERSION_FILENAME}-${TOOLS_SUFFIX}")
+    SET(TOOLS_URL "${TOOLS_URL_PREFIX}/${TOOLS_ARCHIVE_NAME}")
+  ENDIF()
 ENDIF()
 
-SET(TOOLS_ARCHIVE_NAME "gcc-arm-none-eabi-${TOOLS_VERSION_FILENAME}-${TOOLS_SUFFIX}")
-SET(TOOLS_URL "${TOOLS_URL_PREFIX}/${TOOLS_ARCHIVE_NAME}")
-
-IF(TOOLS_SUFFIX AND NOT IS_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/gcc-arm-none-eabi")
-message("Downloading ARM EABI toolchain from ${TOOLS_URL} ...")
-file(DOWNLOAD ${TOOLS_URL} "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_ARCHIVE_NAME}" SHOW_PROGRESS)
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar xhjf "${TOOLS_ARCHIVE_NAME}"
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/")
-file(RENAME "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_EXPANDED_DIRNAME}" "${CMAKE_SOURCE_DIR}/../Tools/gcc-arm-none-eabi")
-file(REMOVE "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_ARCHIVE_NAME}")
+IF(TOOLS_URL AND NOT IS_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_DIR}")
+  message("Downloading ARM EABI toolchain from ${TOOLS_URL} ...")
+  file(DOWNLOAD ${TOOLS_URL} "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_ARCHIVE_NAME}" SHOW_PROGRESS)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xhjf "${TOOLS_ARCHIVE_NAME}"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../Tools/")
+  file(REMOVE "${CMAKE_SOURCE_DIR}/../Tools/${TOOLS_ARCHIVE_NAME}")
 ENDIF()
 
 SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
-SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/../Tools/gcc-arm-none-eabi/bin/arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/../Tools/gcc-arm-none-eabi/bin/arm-none-eabi-g++)
-SET(OBJCOPY ${PROJECT_SOURCE_DIR}/../Tools/gcc-arm-none-eabi/bin/arm-none-eabi-objcopy)
+SET(CMAKE_C_COMPILER ${PROJECT_SOURCE_DIR}/../Tools/${TOOLS_DIR}/bin/arm-none-eabi-gcc)
+SET(CMAKE_CXX_COMPILER ${PROJECT_SOURCE_DIR}/../Tools/${TOOLS_DIR}/bin/arm-none-eabi-g++)
+SET(OBJCOPY ${PROJECT_SOURCE_DIR}/../Tools/${TOOLS_DIR}/bin/arm-none-eabi-objcopy)
 
 SET(CMAKE_FIND_ROOT_PATH
-  ${PROJECT_SOURCE_DIR}/../Tools/gcc-arm-none-eabi/arm-none-eabi/bin
-  ${PROJECT_SOURCE_DIR}/../Tools/gcc-arm-none-eabi/arm-none-eabi/lib
-  ${PROJECT_SOURCE_DIR}/../Tools/gcc-arm-none-eabi/arm-none-eabi/include
+  ${PROJECT_SOURCE_DIR}/../Tools/${TOOLS_DIR}/arm-none-eabi/bin
+  ${PROJECT_SOURCE_DIR}/../Tools/${TOOLS_DIR}/arm-none-eabi/lib
+  ${PROJECT_SOURCE_DIR}/../Tools/${TOOLS_DIR}/arm-none-eabi/include
  )
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

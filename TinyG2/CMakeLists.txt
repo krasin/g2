@@ -29,6 +29,10 @@ IF(PLATFORM STREQUAL "gShield")
 ELSE(PLATFORM STREQUAL "G2v9g")
   SET(BASE_PLATFORM "v9_3x8c")
   SET(MOTATE_BOARD "G2v9g")
+ELSE(PLATFORM STREQUAL "qemu")
+  # qemu will get its own values. Otherwise, too close simulation will be required.
+  SET(BASE_PLATFORM "due")
+  SET(MOTATE_BOARD "gShield")
 ELSE()
   MESSAGE(FATAL_ERROR "Unknown platform: ${PLATFORM}")
 ENDIF()
@@ -61,7 +65,7 @@ ENDIF()
 
 add_definitions("-D__${CHIP}__")
 # SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld -Wl,--entry=Reset_Handler")
-SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/m3-semihosting.ld -Wl,--entry=Reset_Handler")
+SET(CMAKE_EXE_LINKER_FLAGS "-T generic-m-hosted.ld -Wl,--entry=Reset_Handler")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--check-sections -Wl,--gc-sections")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--cref -Wl,-Map,${PLATFORM}.map")
 
@@ -69,7 +73,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--cref -Wl,-Map,${PLAT
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=SMC_Handler=0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=USART3_Handler=0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=EMAC_Handler=0")
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles --specs=nano.specs -u _printf_float -mcpu=cortex-m3 -mthumb")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcpu=cortex-m3 -mthumb")
 
 include_directories(. motate "${CMSIS_ROOT}/CMSIS/Include")
 
