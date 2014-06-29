@@ -29,6 +29,9 @@ IF(PLATFORM STREQUAL "gShield")
 ELSE(PLATFORM STREQUAL "G2v9g")
   SET(BASE_PLATFORM "v9_3x8c")
   SET(MOTATE_BOARD "G2v9g")
+ELSE(PLATFORM STREQUAL "qemu")
+  SET(BASE_PLATFORM "qemu")
+  SET(MOTATE_BOARD "gShield")
 ELSE()
   MESSAGE(FATAL_ERROR "Unknown platform: ${PLATFORM}")
 ENDIF()
@@ -46,6 +49,9 @@ IF(BASE_PLATFORM STREQUAL "due")
       CMSIS/Device/ATMEL/sam3xa/include
       platform/atmel_sam
       platform/atmel_sam/board/due)
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nano.specs")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--entry=Reset_Handler -nostartfiles")
 ENDIF()
 
 IF(BASE_PLATFORM STREQUAL "v9_3x8c")
@@ -57,10 +63,25 @@ IF(BASE_PLATFORM STREQUAL "v9_3x8c")
       platform/atmel_sam
       CMSIS/Device/ATMEL/sam3xa/include
       platform/atmel_sam/board/v9_3x8c)
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=nano.specs")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--entry=Reset_Handler -nostartfiles")
+ENDIF()
+
+IF(BASE_PLATFORM STREQUAL "qemu")
+  SET(CHIP "SAM3X8E")
+  SET(PLATFORM_BASE platform/atmel_sam)
+  SET(CMSIS_ROOT CMSIS)
+  include_directories(
+      CMSIS/Device/ATMEL
+      CMSIS/Device/ATMEL/sam3xa/include
+      platform/atmel_sam
+      platform/atmel_sam/board/due)
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --specs=rdimon.specs")
 ENDIF()
 
 add_definitions("-D__${CHIP}__")
-SET(CMAKE_EXE_LINKER_FLAGS "-T ${PROJECT_SOURCE_DIR}/${PLATFORM_BASE}/gcc_flash.ld -Wl,--entry=Reset_Handler")
+
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--check-sections -Wl,--gc-sections")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--cref -Wl,-Map,${PLATFORM}.map")
 
@@ -68,7 +89,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--cref -Wl,-Map,${PLAT
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=SMC_Handler=0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=USART3_Handler=0")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=EMAC_Handler=0")
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles --specs=nano.specs -u _printf_float -mcpu=cortex-m3 -mthumb")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -u _printf_float -mcpu=cortex-m3 -mthumb")
 
 include_directories(. motate "${CMSIS_ROOT}/CMSIS/Include")
 
